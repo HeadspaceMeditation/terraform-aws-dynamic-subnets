@@ -1,6 +1,6 @@
 module "public_label" {
   source  = "cloudposse/label/null"
-  version = "0.22.1"
+  version = "0.24.1"
 
   attributes = ["public"]
   tags = merge(
@@ -16,6 +16,8 @@ locals {
   public_route_expr_enabled  = local.enabled && signum(length(var.vpc_default_route_table_id)) == 1
   public_network_acl_enabled = local.enabled && signum(length(var.public_network_acl_id)) == 0 ? 1 : 0
   vpc_default_route_table_id = local.enabled ? signum(length(var.vpc_default_route_table_id)) : 0
+  public_secure_nacl         = local.enabled && var.secure_nacl ? 1 : 0
+  local_public_nacl_rules  = var.local_public_nacl_rules
 }
 
 resource "aws_subnet" "public" {
@@ -98,4 +100,53 @@ resource "aws_network_acl" "public" {
   }
 
   tags = module.public_label.tags
+}
+
+#### updated
+resource "aws_network_acl" "public_secure_nacl" {
+  count      = local.public_secure_nacl
+  vpc_id     = var.vpc_id
+  subnet_ids = aws_subnet.public.*.id
+
+  dynamic "egress" {
+    for_each = [for rule_obj in local.public_nacl_rules : {
+      port       = rule_obj.port
+      rule_no    = rule_obj.rule_num
+      cidr_block = rule_obj.cidr
+      protocol   = rule_obj.protocol
+      action     = rule_obj.action
+    }]
+    content {
+      protocol   = egress.value["protocol"]
+      rule_no    = egress.value["rule_no"]
+      action     = egress.value["action"]
+      cidr_block = egress.value["cidr_block"]
+      from_port  = egress.value["port"]
+      to_port    = egress.value["port"]
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = [for rule_obj in local.public_nacl_rules : {
+      port       = rule_obj.port
+      rule_no    = rule_obj.rule_num
+      cidr_block = rule_obj.cidr
+      protocol   = rule_obj.protocol
+      action     = rule_obj.action
+    }]
+    content {
+      protocol   = ingress.value["protocol"] 
+      rule_no    = ingress.value["rule_no"]
+      action     = ingress.value["action"]
+      cidr_block = ingress.value["cidr_block"]
+      from_port  = ingress.value["port"]
+      to_port    = ingress.value["port"]
+    }
+  }
+
+  tags = module.public_label.tags
+}
+
+locals {
+  public_nacl_rules = local.local_public_nacl_rules
 }

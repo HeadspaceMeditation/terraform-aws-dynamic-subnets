@@ -113,3 +113,20 @@ variable "public_subnets_additional_tags" {
   description = "Additional tags to be added to public subnets"
 }
 
+variable "secure_nacl" {
+  type        = bool
+  default     = false 
+  description = "Whether or not to use secure nacl"
+}
+
+variable "local_public_nacl_rules" {
+  type        = list(any)
+  default     = []
+  description = "list of public nacl rules"
+}
+
+variable "local_private_nacl_rules" {
+  type        = list(any)
+  default     = []
+  description = "list of private nacl rules"
+}

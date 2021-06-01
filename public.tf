@@ -102,7 +102,6 @@ resource "aws_network_acl" "public" {
   tags = module.public_label.tags
 }
 
-#### updated
 resource "aws_network_acl" "public_secure_nacl" {
   count      = local.public_secure_nacl
   vpc_id     = var.vpc_id

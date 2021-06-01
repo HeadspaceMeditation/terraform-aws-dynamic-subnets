@@ -86,7 +86,6 @@ resource "aws_network_acl" "private" {
   tags = module.private_label.tags
 }
 
-#### updated
 resource "aws_network_acl" "private_secure_nacl" {
   count      = local.private_secure_nacl
   vpc_id     = var.vpc_id

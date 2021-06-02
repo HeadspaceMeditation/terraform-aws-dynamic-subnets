@@ -119,14 +119,26 @@ variable "secure_nacl" {
   description = "Whether or not to use secure nacl"
 }
 
-variable "local_public_nacl_rules" {
+variable "ingress_public_nacl_rules" {
   type        = list(any)
   default     = []
-  description = "list of public nacl rules"
+  description = "list of ingress public nacl rules"
 }
 
-variable "local_private_nacl_rules" {
+variable "ingress_private_nacl_rules" {
   type        = list(any)
   default     = []
-  description = "list of private nacl rules"
+  description = "list of ingress private nacl rules"
+}
+
+variable "egress_public_nacl_rules" {
+  type        = list(any)
+  default     = []
+  description = "list of egress public nacl rules"
+}
+
+variable "egress_private_nacl_rules" {
+  type        = list(any)
+  default     = []
+  description = "list of egress private nacl rules"
 }

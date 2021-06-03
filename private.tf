@@ -14,7 +14,6 @@ module "private_label" {
 locals {
   private_subnet_count        = var.max_subnet_count == 0 ? length(flatten(data.aws_availability_zones.available.*.names)) : var.max_subnet_count
   private_network_acl_enabled = signum(length(var.private_network_acl_id)) == 0 ? 1 : 0
-  private_secure_nacl         = local.enabled && var.secure_nacl ? 1 : 0
   ingress_private_nacl_rules  = var.ingress_private_nacl_rules
   egress_private_nacl_rules   = var.egress_private_nacl_rules
 }
@@ -63,33 +62,6 @@ resource "aws_route_table_association" "private" {
 
 resource "aws_network_acl" "private" {
   count      = local.enabled ? local.private_network_acl_enabled : 0
-  vpc_id     = var.vpc_id
-  subnet_ids = aws_subnet.private.*.id
-
-  egress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
-
-  ingress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
-
-  tags = module.private_label.tags
-}
-
-#### updated
-resource "aws_network_acl" "private_secure_nacl" {
-  count      = local.private_secure_nacl
   vpc_id     = var.vpc_id
   subnet_ids = aws_subnet.private.*.id
 

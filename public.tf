@@ -16,7 +16,6 @@ locals {
   public_route_expr_enabled  = local.enabled && signum(length(var.vpc_default_route_table_id)) == 1
   public_network_acl_enabled = local.enabled && signum(length(var.public_network_acl_id)) == 0 ? 1 : 0
   vpc_default_route_table_id = local.enabled ? signum(length(var.vpc_default_route_table_id)) : 0
-  public_secure_nacl         = local.enabled && var.secure_nacl ? 1 : 0
   ingress_public_nacl_rules  = var.ingress_public_nacl_rules
   egress_public_nacl_rules   = var.egress_public_nacl_rules
 }
@@ -79,33 +78,6 @@ resource "aws_route_table_association" "public_default" {
 
 resource "aws_network_acl" "public" {
   count      = local.public_network_acl_enabled
-  vpc_id     = var.vpc_id
-  subnet_ids = aws_subnet.public.*.id
-
-  egress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
-
-  ingress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
-
-  tags = module.public_label.tags
-}
-
-#### updated
-resource "aws_network_acl" "public_secure_nacl" {
-  count      = local.public_secure_nacl
   vpc_id     = var.vpc_id
   subnet_ids = aws_subnet.public.*.id
 

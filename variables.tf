@@ -134,5 +134,5 @@ variable "egress_public_nacl_rules" {
 variable "egress_private_nacl_rules" {
   type        = list(any)
   default     = [{ rule_num : 100, from_port : 0, to_port: 0, protocol : "tcp", action : "allow", cidr : "0.0.0.0/0", "icmp_code": null, "icmp_type": null}]
-  description = "list of egress private nacl rules "
+  description = "list of egress private nacl rules"
 }

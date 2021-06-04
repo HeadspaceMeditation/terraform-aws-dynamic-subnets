@@ -14,6 +14,8 @@ module "private_label" {
 locals {
   private_subnet_count        = var.max_subnet_count == 0 ? length(flatten(data.aws_availability_zones.available.*.names)) : var.max_subnet_count
   private_network_acl_enabled = signum(length(var.private_network_acl_id)) == 0 ? 1 : 0
+  ingress_private_nacl_rules  = var.ingress_private_nacl_rules
+  egress_private_nacl_rules   = var.egress_private_nacl_rules
 }
 
 resource "aws_subnet" "private" {
@@ -63,23 +65,52 @@ resource "aws_network_acl" "private" {
   vpc_id     = var.vpc_id
   subnet_ids = aws_subnet.private.*.id
 
-  egress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
+  dynamic "egress" {
+    for_each = [for rule_obj in local.egress_private_nacl_rules : {
+      from_port  = rule_obj.from_port
+      to_port    = rule_obj.to_port
+      rule_no    = rule_obj.rule_num
+      cidr_block = rule_obj.cidr
+      protocol   = rule_obj.protocol
+      action     = rule_obj.action
+      icmp_code  = rule_obj.icmp_code
+      icmp_type  = rule_obj.icmp_type
+    }]
+    content {
+      protocol   = egress.value["protocol"]
+      rule_no    = egress.value["rule_no"]
+      action     = egress.value["action"]
+      cidr_block = egress.value["cidr_block"]
+      from_port  = egress.value["from_port"]
+      to_port    = egress.value["to_port"]
+      icmp_code  = egress.value["icmp_code"] 
+      icmp_type  = egress.value["icmp_type"]
+    }
   }
 
-  ingress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
+  dynamic "ingress" {
+    for_each = [for rule_obj in local.ingress_private_nacl_rules : {
+      from_port  = rule_obj.from_port
+      to_port    = rule_obj.to_port
+      rule_no    = rule_obj.rule_num
+      cidr_block = rule_obj.cidr
+      protocol   = rule_obj.protocol
+      action     = rule_obj.action
+      icmp_code  = rule_obj.icmp_code
+      icmp_type  = rule_obj.icmp_type
+    }]
+    content {
+      protocol   = ingress.value["protocol"]
+      rule_no    = ingress.value["rule_no"]
+      action     = ingress.value["action"]
+      cidr_block = ingress.value["cidr_block"]
+      from_port  = ingress.value["from_port"]
+      to_port    = ingress.value["to_port"]
+      icmp_code  = ingress.value["icmp_code"]
+      icmp_type  = ingress.value["icmp_type"]
+    }
   }
 
   tags = module.private_label.tags
 }
+

@@ -113,3 +113,26 @@ variable "public_subnets_additional_tags" {
   description = "Additional tags to be added to public subnets"
 }
 
+variable "ingress_public_nacl_rules" {
+  type        = list(any)
+  default     = [{ rule_num : 100, from_port : 0, to_port: 0, protocol : "tcp", action : "allow", cidr : "0.0.0.0/0", "icmp_code": null, "icmp_type": null}]
+  description = "list of ingress public nacl rules"
+}
+
+variable "ingress_private_nacl_rules" {
+  type        = list(any)
+  default     = [{ rule_num : 100, from_port : 0, to_port: 0, protocol : "tcp", action : "allow", cidr : "0.0.0.0/0", "icmp_code": null, "icmp_type": null}]
+  description = "list of ingress private nacl rules"
+}
+
+variable "egress_public_nacl_rules" {
+  type        = list(any)
+  default     = [{ rule_num : 100, from_port : 0, to_port: 0, protocol : "tcp", action : "allow", cidr : "0.0.0.0/0", "icmp_code": null, "icmp_type": null}]
+  description = "list of egress public nacl rules"
+}
+
+variable "egress_private_nacl_rules" {
+  type        = list(any)
+  default     = [{ rule_num : 100, from_port : 0, to_port: 0, protocol : "tcp", action : "allow", cidr : "0.0.0.0/0", "icmp_code": null, "icmp_type": null}]
+  description = "list of egress private nacl rules"
+}
